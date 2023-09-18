@@ -1,0 +1,84 @@
+classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
+    properties (Access = private)
+        CIServiceBaseUrl
+        BuildId
+    end
+
+    methods
+        function plugin = QualityDashJenkinsPlugin(ciServiceBaseUrl)
+            plugin.CIServiceBaseUrl = ciServiceBaseUrl;
+            plugin.BuildId = "";
+        end
+    end
+
+    methods (Access = protected)
+        function runTaskGraph(plugin, pluginData)
+             % Populate task graph, build, and build number
+            reqBody.graph = pluginData.TaskGraph;
+            reqBody.build = getenv("JOB_NAME");
+            reqBody.number = getenv("BUILD_NUMBER");
+
+            % Let service know build has started
+            % request = matlab.net.http.RequestMessage('POST', [matlab.net.http.field.ContentTypeField( 'application/vnd.api+json' ), matlab.net.http.field.AcceptField('application/vnd.api+json')], jsonencode(reqBody));
+            % resp = request.send(plugin.CIServiceBaseUrl + "/ci-webservice/api/builds");
+
+            % Get build id from response
+            % plugin.BuildId = resp.Body.Data.x_id;
+
+            % Run task graph
+            runTaskGraph@matlab.buildtool.plugins.BuildRunnerPlugin(plugin, pluginData);
+
+            % request = matlab.net.http.RequestMessage('PUT', [matlab.net.http.field.ContentTypeField('application/vnd.api+json'), matlab.net.http.field.AcceptField('application/vnd.api+json')], jsonencode(statusReqBody));
+            % request.send(plugin.CIServiceBaseUrl + "/ci-webservice/api/builds/" + plugin.BuildId);
+            plugin.BuildId = "";
+        end
+
+        function runTask(plugin, pluginData)
+            % Get task name and set task status to running
+            reqBody.task = pluginData.Name;
+            reqBody.status = "RUNNING";
+     
+            ts = pluginData.TaskGraph.Tasks;
+            t = ts(strcmp(ts.Name, pluginData.Name));
+
+            % Run task
+            runTask@matlab.buildtool.plugins.BuildRunnerPlugin(plugin, pluginData);
+
+            % Test task
+            if (isa(t, "matlab.buildtool.tasks.TestTask"))
+                outs = t.TestResults.paths();
+                matfile = regexp(outs, ".*\.mat$", "match");
+
+                matdata = load(matfile);
+                r.Passed = sum([matdata.results.Passed]);
+                r.Failed = sum([matdata.results.Failed]);
+                r.Incomplete = sum([matdata.results.Incomplete]);
+                r.NotRun = 0;
+
+                r.hash = getenv("BUILD_NUMBER");
+
+                sendData(r, "http://localhost:8000/results")
+            % Code issues task
+            elseif (isa(t, "matlab.buildtool.tasks.CodeIssuesTask"))
+                outs = t.Results.paths();
+                matfile = regexp(outs, ".*\.mat$", "match");
+
+                matdata = load(matfile);
+                arr = matdata.Issues;
+
+                i.Errors = sum([strcmp(arr.Severity, "error")]);
+                i.Warnings = sum([strcmp(arr.Severity, "warning")]);
+                i.Info = sum([strcmp(arr.Severity, "info")]);
+
+                i.hash = getenv("BUILD_NUMBER");
+
+                sendData(i, "http://localhost:8000/issues");
+            end
+        end
+    end
+end
+
+function sendData(data, uri)
+req = matlab.net.http.RequestMessage('POST', matlab.net.http.HeaderField("ContentType", "application/json"), matlab.net.http.MessageBody(data));
+send(req, uri);
+end
