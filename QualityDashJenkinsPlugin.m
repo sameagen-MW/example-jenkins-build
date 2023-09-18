@@ -14,13 +14,10 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
     methods (Access = protected)
         function runTaskGraph(plugin, pluginData)
              % Populate task graph, build, and build number
-            reqBody.graph = pluginData.TaskGraph;
-            reqBody.build = getenv("JOB_NAME");
-            reqBody.number = getenv("BUILD_NUMBER");
+            reqBody.buildnum = getenv("BUILD_NUMBER");
 
             % Let service know build has started
-            % request = matlab.net.http.RequestMessage('POST', [matlab.net.http.field.ContentTypeField( 'application/vnd.api+json' ), matlab.net.http.field.AcceptField('application/vnd.api+json')], jsonencode(reqBody));
-            % resp = request.send(plugin.CIServiceBaseUrl + "/ci-webservice/api/builds");
+            sendData(reqBody, "http://localhost:8000/builds/add");
 
             % Get build id from response
             % plugin.BuildId = resp.Body.Data.x_id;
