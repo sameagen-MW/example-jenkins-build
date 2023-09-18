@@ -1,1 +1,1 @@
-assert(true);
+assert(false);
