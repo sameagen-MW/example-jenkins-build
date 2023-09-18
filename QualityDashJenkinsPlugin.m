@@ -65,6 +65,9 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                 matfile = regexp(outs, ".*\.mat$", "match");
 
                 matdata = load(matfile);
+
+                disp(matdata);
+                
                 arr = matdata.Issues;
 
                 i.Errors = sum([strcmp(arr.Severity, "error")]);
