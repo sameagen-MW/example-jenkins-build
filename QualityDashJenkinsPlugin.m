@@ -35,9 +35,6 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
         function runTask(plugin, pluginData)
             % Get task name and set task status to running
-            reqBody.task = pluginData.Name;
-            reqBody.status = "RUNNING";
-
             disp("Running!");
      
             ts = pluginData.TaskGraph.Tasks;
