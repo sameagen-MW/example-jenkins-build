@@ -45,8 +45,6 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
             % Run task
             runTask@matlab.buildtool.plugins.BuildRunnerPlugin(plugin, pluginData);
 
-            disp("Over!");
-
             % Test task
             if (isa(t, "matlab.buildtool.tasks.TestTask"))
                 outs = t.TestResults.paths();
@@ -55,13 +53,11 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                 matdata = load(matfile);
 
                 disp(matdata);
-                
-                r.Passed = sum([matdata.results.Passed]);
-                r.Failed = sum([matdata.results.Failed]);
-                r.Incomplete = sum([matdata.results.Incomplete]);
-                r.NotRun = 0;
 
-                disp("pre hash set");
+                r.Passed = sum([matdata.result.Passed]);
+                r.Failed = sum([matdata.result.Failed]);
+                r.Incomplete = sum([matdata.result.Incomplete]);
+                r.NotRun = 0;
 
                 r.hash = getenv("BUILD_NUMBER");
 
