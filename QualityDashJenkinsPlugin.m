@@ -61,7 +61,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
                 r.hash = getenv("BUILD_NUMBER");
 
-                sendData(r, "http://localhost:8000/results")
+                sendData(r, "http://localhost:8000/results/add")
             % Code issues task
             elseif (isa(t, "matlab.buildtool.tasks.CodeIssuesTask"))
                 outs = t.Results.paths();
