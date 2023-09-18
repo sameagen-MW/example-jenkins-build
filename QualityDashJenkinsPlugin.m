@@ -37,12 +37,18 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
             % Get task name and set task status to running
             reqBody.task = pluginData.Name;
             reqBody.status = "RUNNING";
+
+            disp("Running!");
      
             ts = pluginData.TaskGraph.Tasks;
             t = ts(strcmp(ts.Name, pluginData.Name));
 
+            disp(t);
+
             % Run task
             runTask@matlab.buildtool.plugins.BuildRunnerPlugin(plugin, pluginData);
+
+            disp("Over!");
 
             % Test task
             if (isa(t, "matlab.buildtool.tasks.TestTask"))
@@ -54,6 +60,8 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                 r.Failed = sum([matdata.results.Failed]);
                 r.Incomplete = sum([matdata.results.Incomplete]);
                 r.NotRun = 0;
+
+                disp("pre hash set");
 
                 r.hash = getenv("BUILD_NUMBER");
 
@@ -74,6 +82,8 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
                 sendData(i, "http://localhost:8000/issues");
             end
+
+            disp("Task-DONE");
         end
     end
 end
