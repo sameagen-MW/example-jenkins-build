@@ -66,9 +66,9 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
                 matdata = load(matfile);
 
-                disp(matdata);
-                
-                arr = matdata.Issues;
+                disp(matdata.issues);
+
+                arr = matdata.issues.Issues;
 
                 i.Errors = sum([strcmp(arr.Severity, "error")]);
                 i.Warnings = sum([strcmp(arr.Severity, "warning")]);
