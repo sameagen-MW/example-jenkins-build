@@ -66,11 +66,11 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                 if ~isempty(matfile)
                     matdata = load(matfile);
     
-                    cov.function = coverageSummary(matdata.coverage, "function");
-                    cov.statement = coverageSummary(matdata.coverage, "statement");
-                    cov.decision = coverageSummary(matdata.coverage, "decision");
-                    cov.condition = coverageSummary(matdata.coverage, "condition");
-                    cov.mcdc = coverageSummary(matdata.coverage, "mcdc");
+                    cov.function = sum(coverageSummary(matdata.coverage, "function"));
+                    cov.statement = sum(coverageSummary(matdata.coverage, "statement"));
+                    cov.decision = sum(coverageSummary(matdata.coverage, "decision"));
+                    cov.condition = sum(coverageSummary(matdata.coverage, "condition"));
+                    cov.mcdc = sum(coverageSummary(matdata.coverage, "mcdc"));
 
                     cov.hash = getenv("BUILD_NUMBER");
 
