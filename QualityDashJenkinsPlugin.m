@@ -72,6 +72,8 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                     cov.condition = coverageSummary(matdata.coverage, "condition");
                     cov.mcdc = coverageSummary(matdata.coverage, "mcdc");
 
+                    cov.hash = getenv("BUILD_NUMBER");
+
                     sendData(cov, "http://localhost:8000/coverage/add");
                 end
 
