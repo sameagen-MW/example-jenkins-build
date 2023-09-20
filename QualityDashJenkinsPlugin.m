@@ -47,18 +47,34 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
                 outs = t.TestResults.paths();
                 matfile = regexp(outs, ".*\.mat$", "match");
 
-                matdata = load(matfile);
+                if ~isempty(matfile)
+                    matdata = load(matfile);
+    
+                    r.Passed = sum([matdata.result.Passed]);
+                    r.Failed = sum([matdata.result.Failed]);
+                    r.Incomplete = sum([matdata.result.Incomplete]);
+                    r.NotRun = 0;
+    
+                    r.hash = getenv("BUILD_NUMBER");
+    
+                    sendData(r, "http://localhost:8000/results/add")
+                end
 
-                disp(matdata);
+                outs = t.CodeCoverageResults.paths();
+                matfile = regexp(outs, ".*\.mat$", "match");
 
-                r.Passed = sum([matdata.result.Passed]);
-                r.Failed = sum([matdata.result.Failed]);
-                r.Incomplete = sum([matdata.result.Incomplete]);
-                r.NotRun = 0;
+                if ~isempty(matfile)
+                    matdata = load(matfile);
+    
+                    cov.function = coverageSummary(matdata.coverage, "function");
+                    cov.statement = coverageSummary(matdata.coverage, "statement");
+                    cov.decision = coverageSummary(matdata.coverage, "decision");
+                    cov.condition = coverageSummary(matdata.coverage, "condition");
+                    cov.mcdc = coverageSummary(matdata.coverage, "mcdc");
 
-                r.hash = getenv("BUILD_NUMBER");
+                    sendData(cov, "http://localhost:8000/coverage/add");
+                end
 
-                sendData(r, "http://localhost:8000/results/add")
             % Code issues task
             elseif (isa(t, "matlab.buildtool.tasks.CodeIssuesTask"))
                 outs = t.Results.paths();
