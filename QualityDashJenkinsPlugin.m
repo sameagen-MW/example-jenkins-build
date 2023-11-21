@@ -6,7 +6,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
     methods
         function plugin = QualityDashJenkinsPlugin(ciServiceBaseUrl)
-            plugin.CIServiceBaseUrl = ciServiceBaseUrl;
+            plugin.CIServiceBaseUrl = "http://mycluster.ip:32420";
             plugin.BuildId = "";
         end
     end
@@ -17,7 +17,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
             reqBody.buildnum = getenv("BUILD_NUMBER");
 
             % Let service know build has started
-            sendData(reqBody, "http://192.168.49.2:30010/builds/add");
+            sendData(reqBody, plugin.CIServiceBaseUrl + "/builds/add");
 
             % Get build id from response
             % plugin.BuildId = resp.Body.Data.x_id;
@@ -57,7 +57,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
     
                     r.hash = getenv("BUILD_NUMBER");
     
-                    sendData(r, "http://192.168.49.2:30010/results/add")
+                    sendData(r, plugin.CIServiceBaseUrl + "/results/add")
                 end
 
                 outs = t.CodeCoverageResults.paths();
@@ -74,7 +74,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
                     cov.hash = getenv("BUILD_NUMBER");
 
-                    sendData(cov, "http://192.168.49.2:30010/coverage/add");
+                    sendData(cov, plugin.CIServiceBaseUrl + "/coverage/add");
                 end
 
             % Code issues task
@@ -94,7 +94,7 @@ classdef QualityDashJenkinsPlugin < matlab.buildtool.plugins.BuildRunnerPlugin
 
                 i.hash = getenv("BUILD_NUMBER");
 
-                sendData(i, "http://192.168.49.2:30010/issues/add");
+                sendData(i, plugin.CIServiceBaseUrl + "/issues/add");
             end
 
             disp("Task-DONE");
